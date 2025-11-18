@@ -1,6 +1,9 @@
 # Use Python 3.9 slim image
 FROM python:3.9-slim
 
+# Install system certificates and curl
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
+
 # Set working directory
 WORKDIR /app
 

@@ -1,0 +1,24 @@
+# Neighborly Bicep Deployment Parameters
+# Copy this file to neighborly-infrastructure.parameters.json and customize
+
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus"
+    },
+    "environment": {
+      "value": "dev"
+    },
+    "notificationEmail": {
+      "value": "your-email@example.com"
+    },
+    "deployAKS": {
+      "value": false
+    },
+    "deployACR": {
+      "value": false
+    }
+  }
+}

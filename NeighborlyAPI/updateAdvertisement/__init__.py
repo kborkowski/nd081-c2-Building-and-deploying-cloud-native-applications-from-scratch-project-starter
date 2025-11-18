@@ -15,7 +15,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             database = client['neighborlydb']
             collection = database['advertisements']
             
-            filter_query = {'_id': ObjectId(id)}
+            filter_query = {'_id': id}
             update_query = {"$set": eval(request)}
             rec_id1 = collection.update_one(filter_query, update_query)
             return func.HttpResponse(status_code=200)
