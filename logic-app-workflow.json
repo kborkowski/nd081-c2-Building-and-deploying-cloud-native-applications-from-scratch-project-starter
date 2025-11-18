@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "When_a_resource_event_occurs": {
+      "type": "ApiConnectionWebhook",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['azureeventgrid']['connectionId']"
+          }
+        },
+        "body": {
+          "properties": {
+            "topic": "/subscriptions/e2c7cd99-c3c5-4a90-9109-02e7d50f8311/resourceGroups/neighborly-rg/providers/Microsoft.EventGrid/topics/neighborly-events",
+            "destination": {
+              "endpointType": "webhook",
+              "properties": {
+                "endpointUrl": "@{listCallbackUrl()}"
+              }
+            }
+          }
+        },
+        "path": "/subscriptions/@{encodeURIComponent('e2c7cd99-c3c5-4a90-9109-02e7d50f8311')}/providers/@{encodeURIComponent('Microsoft.EventGrid.Topics')}/resource/eventSubscriptions",
+        "queries": {
+          "x-ms-api-version": "2017-09-15-preview"
+        }
+      },
+      "splitOn": "@triggerBody()"
+    }
+  },
+  "actions": {
+    "Send_an_email_(V2)": {
+      "type": "ApiConnection",
+      "inputs": {
+        "host": {
+          "connection": {
+            "name": "@parameters('$connections')['office365']['connectionId']"
+          }
+        },
+        "method": "post",
+        "body": {
+          "To": "v-krbork@microsoft.com",
+          "Subject": "New Advertisement Posted: @{triggerBody()?['subject']}",
+          "Body": "<p>A new advertisement has been posted!<br><br><strong>Event Type:</strong> @{triggerBody()?['eventType']}<br><strong>Event Time:</strong> @{triggerBody()?['eventTime']}<br><strong>Subject:</strong> @{triggerBody()?['subject']}<br><br><strong>Data:</strong><br>@{triggerBody()?['data']}</p>"
+        },
+        "path": "/v2/Mail"
+      },
+      "runAfter": {}
+    }
+  },
+  "outputs": {}
+}

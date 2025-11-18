@@ -1,17 +1,15 @@
 import logging.config
 import os
 from flask import Flask, Blueprint, request, jsonify, render_template, redirect, url_for
-from flask_bootstrap import Bootstrap
 import settings
 import requests
 import json
 from feedgen.feed import FeedGenerator
 from flask import make_response
 from urllib.parse import urljoin
-from werkzeug.contrib.atom import AtomFeed
+from datetime import datetime
 
 app = Flask(__name__)
-Bootstrap(app)
 
 
 
@@ -20,25 +18,12 @@ def get_abs_url(url):
     return urljoin(request.url_root, url)
 
 
-@app.route('/feeds/')
-def feeds():
-    feed = AtomFeed(title='All Advertisements feed',
-                    feed_url=request.url, url=request.url_root)
-
-    response = requests.get(settings.API_URL + '/getAdvertisements')
-    posts = response.json()
-
-    for key, value in posts.items():
-        print("key,value: " + key + ", " + value)
-
-    #     feed.add(post.title,
-    #              content_type='html',
-    #              author= post.author_name,
-    #              url=get_abs_url(post.url),
-    #              updated=post.mod_date,
-    #              published=post.created_date)
-
-    # return feed.get_response()
+# Feeds route disabled - AtomFeed deprecated in Werkzeug 1.0+
+# @app.route('/feeds/')
+# def feeds():
+#     response = requests.get(settings.API_URL + '/getAdvertisements')
+#     posts = response.json()
+#     return jsonify(posts)
 
 
 @app.route('/rss')
@@ -54,8 +39,8 @@ def rss():
 
     for a in ads: 
         fe = fg.add_entry()
-        fe.title(a.title)
-        fe.description(a.description)
+        fe.title(a.get('title', ''))
+        fe.description(a.get('description', ''))
 
     response = make_response(fg.rss_str())
     response.headers.set('Content-Type', 'application/rss+xml')

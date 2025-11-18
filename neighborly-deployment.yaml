@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neighborly-frontend-config
+data:
+  API_URL: "https://your-api-name.azurewebsites.net/api"
+  CONNECTION_STRING: "mongodb://your-cosmos-account:YOUR_PRIMARY_KEY@your-cosmos-account.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@your-cosmos-account@"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neighborly-frontend
+  labels:
+    app: neighborly-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neighborly-frontend
+  template:
+    metadata:
+      labels:
+        app: neighborly-frontend
+    spec:
+      containers:
+      - name: neighborly-frontend
+        image: your-acr-name.azurecr.io/neighborly-frontend:v1
+        ports:
+        - containerPort: 5000
+        env:
+        - name: API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: neighborly-frontend-config
+              key: API_URL
+        - name: CONNECTION_STRING
+          valueFrom:
+            configMapKeyRef:
+              name: neighborly-frontend-config
+              key: CONNECTION_STRING
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: neighborly-frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: neighborly-frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
